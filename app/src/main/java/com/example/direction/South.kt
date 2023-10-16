@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.animation.AnimationUtils
+import android.widget.TextView
 import android.widget.Toast
 import java.lang.Math.abs
 import kotlin.math.sqrt
@@ -123,7 +125,9 @@ class South : AppCompatActivity(), GestureDetector.OnGestureListener, SensorEven
 
         if (acceleration > 14) {
             Toast.makeText(applicationContext, "Shake event detected", Toast.LENGTH_SHORT).show()
-            // @ Hou - implement the animation here
+            val animShake = AnimationUtils.loadAnimation(this, R.anim.shake)
+            val btn = findViewById<TextView>(R.id.textView)
+            btn.startAnimation(animShake)
         }
 
     }
