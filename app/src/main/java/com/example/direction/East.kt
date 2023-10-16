@@ -10,14 +10,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.widget.Toast
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 @Suppress("DEPRECATION")
-class East : AppCompatActivity(), GestureDetector.OnGestureListener {
+class East : AppCompatActivity(), GestureDetector.OnGestureListener, SensorEventListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var sensorManager: SensorManager
     private lateinit var acclerometer: Sensor
     private lateinit var context: Context
+    private var acceleration = 0f
+    private var lastAcceleration = 0f
+    private var currentAcceleration = 0f
     private val threshold: Int = 200
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,16 +90,38 @@ class East : AppCompatActivity(), GestureDetector.OnGestureListener {
         return true
     }
 
-    private val sensorListener: SensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            /*
-             @Rish (https://www.geeksforgeeks.org/how-to-detect-shake-event-in-android/)
-             This link is to implement Acceleration and what not
-            */
+    override fun onResume() {
+        super.onResume()
+        // Register the sensor listener
+        sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Override onPause method
+    override fun onPause() {
+        super.onPause()
+        // Unregister the sensor listener
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        // Get the sensor type
+        val x = event?.values?.get(0) ?: 0f
+        val y = event?.values?.get(1) ?: 0f
+        val z = event?.values?.get(2) ?: 0f
+
+        lastAcceleration = currentAcceleration
+
+        currentAcceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+        val delta: Float = currentAcceleration - lastAcceleration
+        acceleration = acceleration * 0.9f + delta
+
+        if (acceleration > 14) {
+            Toast.makeText(applicationContext, "Shake event detected", Toast.LENGTH_SHORT).show()
         }
 
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            TODO("Not yet implemented")
-        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        //Log.e("HmM", "Changedssdfd")
     }
 }
